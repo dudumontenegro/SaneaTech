@@ -1,0 +1,100 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam classBackgroundColor #F5F9FF
+skinparam classBorderColor #17365D
+skinparam classFontColor #122946
+skinparam ArrowColor #177E89
+skinparam defaultFontName Arial
+hide circle
+skinparam linetype ortho
+
+package "Domínio SaneaTech" {
+  class Cidadao <<Entity>> {
+    - id: Long
+    - nome: String
+    - email: String
+    - telefone: String
+    - ocorrencias: List<Ocorrencia>
+    --
+    + corrigirNome(novoNome: String): void
+    + atualizarContato(email: String, telefone: String): void
+  }
+  class EquipeResponsavel <<Entity>> {
+    - id: Long
+    - nome: String
+    - areaAtuacao: String
+    - ocorrencias: List<Ocorrencia>
+    - alteracoesRegistradas: List<HistoricoStatus>
+    --
+    + renomear(nome: String): void
+    + alterarAreaAtuacao(area: String): void
+  }
+  class Ocorrencia <<Entity>> {
+    - id: Long
+    - protocolo: String
+    - tipo: TipoOcorrencia
+    - descricao: String
+    - status: StatusOcorrencia
+    - criadoEm: Instant
+    - atualizadoEm: Instant
+    - endereco: EnderecoOcorrencia
+    - solicitante: Cidadao
+    - equipeResponsavel: EquipeResponsavel [0..1]
+    - historico: List<HistoricoStatus>
+    --
+    + {static} abrir(solicitante, tipo, descricao, endereco): Ocorrencia
+    + atribuirEquipe(equipe: EquipeResponsavel): void
+    + atualizarDescricao(descricao: String): void
+    + corrigirLocalizacao(endereco: EnderecoOcorrencia): void
+    + iniciarAtendimento(observacao: String): void
+    + concluirAtendimento(observacao: String): void
+  }
+  class HistoricoStatus <<Entity>> {
+    - id: Long
+    - statusAnterior: StatusOcorrencia [0..1]
+    - statusNovo: StatusOcorrencia
+    - observacao: String
+    - registradoEm: Instant
+    - ocorrencia: Ocorrencia
+    - equipeResponsavel: EquipeResponsavel [0..1]
+    --
+    {read-only} sem modificadores públicos
+  }
+  class EnderecoOcorrencia <<Embeddable>> {
+    - logradouro: String
+    - numero: String
+    - bairro: String
+    - cidade: String
+    - uf: String
+    - referencia: String [0..1]
+    --
+    {read-only} sem modificadores públicos
+  }
+  enum StatusOcorrencia {
+    PENDENTE
+    EM_ANDAMENTO
+    CONCLUIDA
+  }
+  enum TipoOcorrencia {
+    VAZAMENTO_AGUA
+    ESGOTO_CEU_ABERTO
+    FALTA_ABASTECIMENTO
+    OUTROS
+  }
+}
+
+Cidadao "1" -- "0..*" Ocorrencia : solicitante / ocorrencias
+EquipeResponsavel "0..1" -- "0..*" Ocorrencia : equipe / ocorrencias
+Ocorrencia "1" *-- "1..*" HistoricoStatus : historico
+EquipeResponsavel "0..1" -- "0..*" HistoricoStatus : equipe / alterações
+Ocorrencia "1" *-- "1" EnderecoOcorrencia : endereco (@Embedded)
+Ocorrencia ..> TipoOcorrencia : tipo
+Ocorrencia ..> StatusOcorrencia : status
+HistoricoStatus ..> StatusOcorrencia : estados
+
+note bottom of Ocorrencia
+PENDENTE → EM_ANDAMENTO → CONCLUIDA
+Precisa de equipe para iniciar atendimento.
+end note
+@enduml
