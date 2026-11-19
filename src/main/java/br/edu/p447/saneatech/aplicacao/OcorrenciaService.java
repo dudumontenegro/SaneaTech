@@ -1,26 +1,30 @@
 package br.edu.p447.saneatech.aplicacao;
 
-import br.edu.p447.saneatech.api.dto.OcorrenciaResposta;
-import br.edu.p447.saneatech.infra.repository.OcorrenciaRepository;
-import java.util.List;
-import java.util.Optional;
+import br.edu.p447.saneatech.dominio.enums.TipoOcorrencia;
+import br.edu.p447.saneatech.dominio.modelo.Cidadao;
+import br.edu.p447.saneatech.dominio.modelo.EnderecoOcorrencia;
+import br.edu.p447.saneatech.dominio.modelo.Ocorrencia;
+import br.edu.p447.saneatech.infraestrutura.CidadaoRepository;
+import br.edu.p447.saneatech.infraestrutura.OcorrenciaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 public class OcorrenciaService {
-    private final OcorrenciaRepository ocorrenciaRepository;
+    private final OcorrenciaRepository ocorrencias;
+    private final CidadaoRepository cidadaos;
 
-    public OcorrenciaService(OcorrenciaRepository ocorrenciaRepository) {
-        this.ocorrenciaRepository = ocorrenciaRepository;
+    public OcorrenciaService(OcorrenciaRepository ocorrencias, CidadaoRepository cidadaos) {
+        this.ocorrencias = ocorrencias;
+        this.cidadaos = cidadaos;
     }
 
-    public List<OcorrenciaResposta> listar() {
-        return ocorrenciaRepository.findAll().stream().map(OcorrenciaResposta::de).toList();
-    }
-
-    public Optional<OcorrenciaResposta> buscarPorId(Long id) {
-        return ocorrenciaRepository.findById(id).map(OcorrenciaResposta::de);
+    @Transactional
+    public OcorrenciaRegistrada registrar(Long cidadaoId, TipoOcorrencia tipo,
+                                          String descricao, EnderecoOcorrencia endereco) {
+        Cidadao cidadao = cidadaos.findById(cidadaoId)
+            .orElseThrow(() -> new CidadaoNaoEncontradoException(cidadaoId));
+        Ocorrencia ocorrencia = Ocorrencia.abrir(cidadao, tipo, descricao, endereco);
+        return OcorrenciaRegistrada.de(ocorrencias.save(ocorrencia));
     }
 }
