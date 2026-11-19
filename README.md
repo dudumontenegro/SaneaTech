@@ -66,6 +66,31 @@ curl -i -X POST http://localhost:8080/equipes \
 mvn clean package
 ```
 
+### API: atualização de status (`feature/atualizacao-status`)
+
+```bash
+mvn spring-boot:run   # sobe a API em http://localhost:8080
+```
+
+Ao iniciar, `src/main/resources/data.sql` insere ocorrências de exemplo no H2 em memória (não depende do endpoint de cadastro):
+
+| id | protocolo | status inicial | observação |
+|---|---|---|---|
+| 1 | `SAN-SEED-0001` | `PENDENTE` | com equipe — pode ir para `EM_ANDAMENTO` |
+| 2 | `SAN-SEED-0002` | `EM_ANDAMENTO` | pode ir para `CONCLUIDA` |
+| 3 | `SAN-SEED-0003` | `CONCLUIDA` | nenhuma transição permitida |
+| 4 | `SAN-SEED-0004` | `PENDENTE` | sem equipe — iniciar é bloqueado |
+
+```bash
+curl -X PATCH http://localhost:8080/ocorrencias/1/status \
+  -H 'Content-Type: application/json' \
+  -d '{"status": "EM_ANDAMENTO", "observacao": "Equipe a caminho."}'
+```
+
+- `AtualizacaoStatusController` (`apresentacao`) recebe `PATCH /ocorrencias/{id}/status` com `status` e `observacao` (obrigatória, até 300 caracteres).
+- `AtualizacaoStatusService` (`aplicacao`) aceita apenas `PENDENTE → EM_ANDAMENTO → CONCLUIDA` (sem pular etapa, retroceder ou repetir) e delega a `Ocorrencia.iniciarAtendimento`/`concluirAtendimento`, que acrescentam o evento ao `HistoricoStatus` existente.
+- Respostas: `200` com o status e o histórico completo; `404` para id inexistente; `422` para transição inválida ou regra de domínio violada (ex.: sem equipe); `400` para corpo inválido. Erros seguem o formato `ProblemDetail` (RFC 9457).
+
 ## 3. Entidades, atributos e relacionamentos
 
 | Entidade | Atributos de negócio e tipos principais | Responsabilidade |
