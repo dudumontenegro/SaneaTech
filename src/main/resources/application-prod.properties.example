@@ -1,0 +1,9 @@
+# Copie este arquivo para application-prod.properties (que NÃO é versionado) e preencha com os dados do Neon.
+# Formato JDBC: jdbc:postgresql://<host>/<banco>?sslmode=require
+spring.datasource.url=jdbc:postgresql://ep-xxxx-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require
+spring.datasource.username=neondb_owner
+spring.datasource.password=COLE_A_SENHA_AQUI
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.hikari.maximum-pool-size=5
+
+spring.jpa.show-sql=false

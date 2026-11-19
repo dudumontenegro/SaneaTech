@@ -1,95 +1,83 @@
 # SaneaTech — Tecnologia para o Saneamento Básico
 
-**Backend Avançado — P4.447 | Ciência da Computação | 2ª entrega: modelagem do domínio e arquitetura**
+**Backend Avançado — P4.447 | Ciência da Computação | 3ª entrega: API REST, migrations e banco Neon**
 
 **Equipe:** Eduardo Cabral · Sérgio Henrique · Leonardo Teixeira · Luca Magalhães · Luís Eduardo Montenegro.
 
-## 1. Descrição e alinhamento com a primeira entrega
+## 1. Descrição
 
-A **primeira entrega** do projeto SaneaTech definiu o problema como a falta de um sistema centralizado para registrar e acompanhar ocorrências de saneamento básico, como vazamentos de água, esgoto a céu aberto e falhas no abastecimento. A solução proposta é uma plataforma web na qual **cidadãos cadastram ocorrências** com descrição e localização e **equipes responsáveis acompanham e atualizam seu status**.
+O SaneaTech é uma plataforma na qual **cidadãos registram ocorrências de saneamento** (vazamentos, esgoto a céu aberto, falta de abastecimento) e **equipes responsáveis acompanham e atualizam o status** `PENDENTE → EM_ANDAMENTO → CONCLUIDA`. Esta entrega expõe o domínio modelado na 2ª entrega por meio de uma API REST e passa a persistir os dados em PostgreSQL (Neon), com schema versionado por Flyway.
 
-O MVP inclui: (1) registro de ocorrências; (2) painel para visualização futura; (3) atualização de status `PENDENTE → EM_ANDAMENTO → CONCLUIDA`. Inteligência artificial, sensores IoT e análises avançadas permanecem **fora do escopo**.
+### Features desta entrega
 
-**Escopo desta segunda entrega:** somente **entidades JPA, atributos e tipos, relacionamentos, invariantes/métodos de domínio, diagrama UML, definição arquitetural e testes**. Não há Controllers, Services, APIs, endpoints ou interface web porque **não são exigidos nesta fase**. O painel e a API são funcionalidades propostas para etapas posteriores, não implementadas aqui.
+| # | Feature (branch) | Responsável | Endpoints | Classes |
+|---|---|---|---|---|
+| 1 | `feature/cadastro-cidadaos` | Eduardo Cabral | `POST /cidadaos`, `GET /cidadaos` | `CidadaoController`, `CidadaoService`, `CidadaoRepository` |
+| 2 | `feature/consulta-equipes` | Sérgio Henrique | `GET /equipes`, `GET /equipes/{id}` | `EquipeController`, `EquipeService`, `EquipeResponsavelRepository` |
+| 3 | `feature/consulta-ocorrencias` | Leonardo Teixeira | `GET /ocorrencias` (`?status=` opcional), `GET /ocorrencias/{id}` | `OcorrenciaController`, `OcorrenciaService`, `OcorrenciaRepository` |
+| 4 | `feature/cadastro-equipes` | Luca Magalhães | `POST /equipes` | `CadastroEquipeController`, `CadastroEquipeService` |
+| 5 | `feature/atualizacao-status` | Luís Eduardo Montenegro | `PATCH /ocorrencias/{id}/status` | `AtualizacaoStatusController`, `AtualizacaoStatusService` |
+| — | registro de ocorrência (entrega anterior) | — | `POST /ocorrencias` | `OcorrenciaController`, `OcorrenciaService` |
+
+**Códigos de resposta:** `200/201` sucesso (o `201` traz o header `Location`); `400` corpo ou parâmetro inválido; `404` recurso inexistente; `409` e-mail de cidadão ou nome de equipe já cadastrado; `422` regra de negócio violada (transição de status inválida, iniciar sem equipe). Os erros seguem `ProblemDetail` (RFC 9457) e são tratados no `GlobalExceptionHandler`. Erros de validação trazem o campo `erros` com a mensagem de cada campo.
+
+**Atualização de status:** só é permitido avançar uma etapa (`PENDENTE → EM_ANDAMENTO → CONCLUIDA`). Pular, retroceder e repetir o status são rejeitados. A `observacao` é obrigatória (até 300 caracteres). Cada mudança acrescenta um registro em `historicos_status` com a equipe responsável.
 
 ## 2. Tecnologias e execução
 
-- **Java 17** (ou superior, compatível com Java 17)
-- **Maven 3.9+** (gerenciador de dependências)
-- **Jakarta Persistence API (JPA) 3.1** para o mapeamento de entidades
-- **Hibernate ORM 6.6.13.Final** como provedor JPA
-- **H2 2.3.232** como banco em memória para demonstração/testes
-- **JUnit Jupiter 5.11.4** para testes automatizados
+- **Java 17** e **Spring Boot 4.1.1** (Spring MVC, Data JPA, Validation)
+- **Maven** via Maven Wrapper (`./mvnw`)
+- **Lombok**
+- **Flyway** (migrations em `src/main/resources/db/migration`)
+- **PostgreSQL / Neon** em produção e **H2** (modo PostgreSQL) no perfil `local` e nos testes
 
-### Pré-requisitos
+### Perfis
 
-```bash
-java -version
-mvn -version
-```
+| Perfil | Arquivo | Banco |
+|---|---|---|
+| `local` (padrão) | `application-local.properties` | H2 em memória, console em `/h2-console` |
+| `prod` | `application-prod.properties` | Neon (PostgreSQL) |
 
-O projeto está configurado para compilar usando Java 17. Não é preciso criar um banco, configurar credenciais reais, iniciar servidor nem configurar variáveis de ambiente.
+O perfil ativo é definido em `application.properties` (`spring.profiles.active`). Nos dois perfis o Flyway cria o schema e o Hibernate apenas valida (`ddl-auto=validate`).
 
-### Rodar testes unitários e teste de persistência
-
-```bash
-mvn clean test
-```
-
-Os testes cobrem a abertura da ocorrência, fluxo e histórico de status, restrições de edição, vínculo bidirecional com a equipe, validações de dados e persistência/recuperação usando JPA + H2. O teste de persistência cria tabelas temporárias automaticamente.
-
-### Executar demonstração JPA em console
+### Rodar localmente (H2)
 
 ```bash
-mvn -q compile exec:java
+./mvnw spring-boot:run
+./mvnw test              # testes de domínio, serviço e controllers (MockMvc)
 ```
 
-O comando cria um cidadão, uma equipe, uma ocorrência e seus eventos de histórico, persiste os registros no H2 e imprime protocolo, status e quantidade de eventos. O banco `jdbc:h2:mem:saneatech` é **volátil**; ao encerrar a execução, os dados deixam de existir. A demonstração é somente um `main()` para validar a modelagem, não uma camada de aplicação ou API.
+### Rodar com o Neon
 
-### API: cadastro de equipes (`feature/cadastro-equipes`)
+1. No console do Neon, abra *Connection Details* e copie host, banco, usuário e senha.
+2. Copie `src/main/resources/application-prod.properties.example` para `application-prod.properties` (esse arquivo está no `.gitignore` e não vai para o GitHub) e preencha:
 
-```bash
-mvn spring-boot:run   # sobe a API em http://localhost:8080
+   ```properties
+   spring.datasource.url=jdbc:postgresql://ep-xxxx-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require
+   spring.datasource.username=neondb_owner
+   spring.datasource.password=<senha>
+   ```
 
-curl -i -X POST http://localhost:8080/equipes \
-  -H 'Content-Type: application/json' \
-  -d '{"nome": "Equipe de Redes", "areaAtuacao": "Manutenção de água"}'
-```
+3. Em `application.properties`, troque para `spring.profiles.active=prod`.
+4. Rode `./mvnw spring-boot:run`. Na primeira execução o Flyway aplica as migrations V1 a V5 no Neon e registra o histórico na tabela `flyway_schema_history`.
 
-- `CadastroEquipeController` (`apresentacao`) recebe `POST /equipes` com `nome` e `areaAtuacao` e responde `201 Created` com `Location: /equipes/{id}` e o corpo `{id, nome, areaAtuacao}`.
-- `CadastroEquipeService` (`aplicacao`) cria a entidade `EquipeResponsavel` já existente (cujo construtor valida e remove espaços extras) e impede nomes duplicados, sem diferenciar maiúsculas/minúsculas.
-- Validações: `nome` e `areaAtuacao` obrigatórios, não vazios e com até 120 caracteres → `400`; nome já cadastrado → `409`; JSON malformado → `400`. Erros seguem o formato `ProblemDetail` (RFC 9457).
+Alternativa local ao Neon: `docker compose -f docker/docker-compose.yml up -d` e `spring.datasource.url=jdbc:postgresql://localhost:5432/saneatech` (usuário e senha `postgres`).
 
-### Compilar pacote
+### Migrations
 
-```bash
-mvn clean package
-```
+| Versão | Arquivo | Conteúdo |
+|---|---|---|
+| V1 | `V1__create_table_cidadaos.sql` | `cidadaos` (e-mail único) |
+| V2 | `V2__create_table_equipes_responsaveis.sql` | `equipes_responsaveis` (nome único) |
+| V3 | `V3__create_table_ocorrencias.sql` | `ocorrencias` (FKs para cidadão e equipe, CHECK de tipo e status, índices) |
+| V4 | `V4__create_table_historicos_status.sql` | `historicos_status` (FK para ocorrência e equipe) |
+| V5 | `V5__insert_dados_iniciais.sql` | 1 cidadão, 2 equipes, 4 ocorrências `SAN-SEED-0001..0004` e o histórico delas |
 
-### API: atualização de status (`feature/atualizacao-status`)
+Uma migration já aplicada **nunca deve ser editada**. Qualquer alteração de schema entra como um novo arquivo `V6__...sql`.
 
-```bash
-mvn spring-boot:run   # sobe a API em http://localhost:8080
-```
+### Testar as rotas no Insomnia
 
-Ao iniciar, `src/main/resources/data.sql` insere ocorrências de exemplo no H2 em memória (não depende do endpoint de cadastro):
-
-| id | protocolo | status inicial | observação |
-|---|---|---|---|
-| 1 | `SAN-SEED-0001` | `PENDENTE` | com equipe — pode ir para `EM_ANDAMENTO` |
-| 2 | `SAN-SEED-0002` | `EM_ANDAMENTO` | pode ir para `CONCLUIDA` |
-| 3 | `SAN-SEED-0003` | `CONCLUIDA` | nenhuma transição permitida |
-| 4 | `SAN-SEED-0004` | `PENDENTE` | sem equipe — iniciar é bloqueado |
-
-```bash
-curl -X PATCH http://localhost:8080/ocorrencias/1/status \
-  -H 'Content-Type: application/json' \
-  -d '{"status": "EM_ANDAMENTO", "observacao": "Equipe a caminho."}'
-```
-
-- `AtualizacaoStatusController` (`apresentacao`) recebe `PATCH /ocorrencias/{id}/status` com `status` e `observacao` (obrigatória, até 300 caracteres).
-- `AtualizacaoStatusService` (`aplicacao`) aceita apenas `PENDENTE → EM_ANDAMENTO → CONCLUIDA` (sem pular etapa, retroceder ou repetir) e delega a `Ocorrencia.iniciarAtendimento`/`concluirAtendimento`, que acrescentam o evento ao `HistoricoStatus` existente.
-- Respostas: `200` com o status e o histórico completo; `404` para id inexistente; `422` para transição inválida ou regra de domínio violada (ex.: sem equipe); `400` para corpo inválido. Erros seguem o formato `ProblemDetail` (RFC 9457).
+Importe `docs/insomnia/saneatech-insomnia.json` (*Import → From File*). A collection tem uma pasta por feature, com os casos de sucesso (✅) e de erro (❌) e o status esperado no nome. O ambiente `Local` define `base_url` e os IDs do seed. Na pasta de atualização de status, execute as requisições na ordem: os PATCH de sucesso alteram o banco.
 
 ## 3. Entidades, atributos e relacionamentos
 
@@ -136,7 +124,7 @@ ABERTURA -> PENDENTE -> EM_ANDAMENTO -> CONCLUIDA
                          (equipe exigida)
 ```
 
-As datas usam `Instant` para representar instantes absolutos, independentes do fuso do servidor. O protocolo é gerado automaticamente como `SAN-<UUID>` e possui índice de unicidade na tabela. O banco também garante unicidade do e-mail do cidadão; a regra de e-mail duplicado entre registros diferentes depende dessa restrição de persistência nesta etapa (não há service de cadastro).
+As datas usam `Instant` para representar instantes absolutos, independentes do fuso do servidor. O protocolo é gerado automaticamente como `SAN-<UUID>` e possui índice de unicidade na tabela. O banco também garante unicidade do e-mail do cidadão; a regra de e-mail duplicado entre registros diferentes depende dessa restrição de persistência nesta etapa (o `CidadaoService` também verifica o e-mail antes de salvar, retornando 409).
 
 ### Exemplo de uso sem API
 
@@ -152,59 +140,43 @@ o.iniciarAtendimento("Equipe em deslocamento");
 o.concluirAtendimento("Reparo finalizado");
 ```
 
-## 5. Arquitetura escolhida: monólito em camadas com domínio rico
+> Na API, as entidades seguem o padrão `XEntity` (`CidadaoEntity`, `EquipeResponsavelEntity`, `OcorrenciaEntity`, `HistoricoStatusEntity`), mas mantêm os mesmos atributos, relacionamentos e regras descritos acima.
 
-A arquitetura do projeto é **monolítica em camadas**, separando **domínio**, **persistência/infrastrutura** e, em versões futuras, **aplicação e apresentação**. Nesta entrega, o código efetivamente implementado fica concentrado no **domínio** (entidades, enums e regras de negócio) e na **configuração de persistência JPA**, mais uma classe de demonstração em console e testes.
+## 5. Arquitetura: monólito modular organizado por feature
 
-**Por que essa escolha?**
+O projeto continua sendo um **monólito**, agora organizado por **feature** (`internal/<feature>`) com camadas internas (`controller`, `dto`, `entity`, `mapper`, `repository`, `service`), no mesmo padrão do projeto de referência `assistencia-uniesp`. As regras de negócio continuam nas entidades (domínio rico). Os services orquestram os casos de uso, os mappers convertem entre entidade e DTO, e o tratamento de erros fica centralizado em `config/exception/GlobalExceptionHandler`.
 
-1. **Necessidades do negócio:** o MVP tem fluxo linear, poucas entidades e uma única área funcional — registro, encaminhamento e acompanhamento de ocorrências. Não há necessidade real de serviços independentes.
-2. **Complexidade:** quatro entidades persistentes e um objeto de valor permitem um modelo consistente e de fácil manutenção. Camadas simplificam a evolução futura sem introduzir complexidade acidental de microsserviços ou mensageria.
-3. **Equipe:** com cinco integrantes, um projeto Maven único e responsabilidades separadas por pastas facilita revisão de código, testes, branches e aprendizado conjunto.
-4. **Regras protegidas:** o comportamento de domínio dentro das entidades reduz o risco de alterações de estado inválidas ou do surgimento de setters indiscriminados.
-5. **Evolução:** quando a próxima etapa exigir interface web, o grupo poderá adicionar `aplicacao` (orquestração de casos de uso), `infraestrutura` (acesso a dados) e `apresentacao` (controllers/endpoints), mantendo entidades e invariantes reutilizáveis.
-
-**Limites assumidos:** o projeto não implementa autenticação, autorização real de operadores, validação de existência externa dos endereços, coordenação de equipes, abertura de chamados por API ou painel visual. Esses itens pertencem a futuras etapas e não são necessários para esta modelagem.
+Quando uma feature precisa de dados de outra, ela usa o service da outra feature, e não o repositório dela. Exemplo: `OcorrenciaService` chama `CidadaoService.buscarEntidadePorId`.
 
 ## 6. Organização do código
 
 ```text
-SaneaTech-Backend-Avancado/
+SaneaTech/
 ├── pom.xml
-├── README.md                         # Descrição, arquitetura, execução e regras
-├── .gitignore
-├── .gitattributes
-├── .github/CONTRIBUTING.md           # Colaboração dos cinco integrantes
+├── mvnw, mvnw.cmd, .mvn/wrapper/
+├── docker/docker-compose.yml          # Postgres local opcional
 ├── docs/
-│   ├── diagrama-classes.png          # UML para Google Sala de Aula
-│   ├── diagrama-classes.svg          # UML em vetor
-│   ├── diagrama-classes.puml         # UML editável em PlantUML
-│   ├── diagrama-classes.dot          # Fonte para gerar PNG/SVG via Graphviz
-│   ├── ENTREGA.md                    # Texto e checklist de submissão
-│   ├── DECISOES_MODELO.md            # Regras e decisões técnicas
-│   └── VALIDACAO.md                  # Registro do que foi testado
-├── src/main/
-│   ├── java/br/edu/p447/saneatech/
-│   │   ├── AplicacaoDemonstracao.java
-│   │   └── dominio/
-│   │       ├── modelo/              # @Entity, @Embeddable, métodos de domínio
-│   │       ├── enums/               # StatusOcorrencia, TipoOcorrencia
-│   │       └── excecao/             # RegraNegocioException
-│   └── resources/META-INF/persistence.xml
-└── src/test/java/br/edu/p447/saneatech/
-    ├── dominio/OcorrenciaTest.java
-    └── infra/PersistenciaJpaTest.java
+│   ├── insomnia/saneatech-insomnia.json
+│   └── diagrama-classes.*, ENTREGA.md, DECISOES_MODELO.md, VALIDACAO.md
+└── src/
+    ├── main/
+    │   ├── java/br/edu/p447/saneatech/
+    │   │   ├── SaneaTechApplication.java
+    │   │   ├── config/exception/GlobalExceptionHandler.java
+    │   │   ├── internal/
+    │   │   │   ├── cidadao/      controller · dto · entity · mapper · repository · service
+    │   │   │   ├── equipe/       controller · dto · entity · mapper · repository · service
+    │   │   │   └── ocorrencia/   controller · dto · entity · mapper · repository · service
+    │   │   └── shared/
+    │   │       ├── exception/    RecursoNaoEncontrado, RegraNegocio, RecursoDuplicado
+    │   │       └── util/         Validacao
+    │   └── resources/
+    │       ├── application.properties, application-local.properties, application-prod.properties
+    │       └── db/migration/     V1..V5
+    └── test/java/br/edu/p447/saneatech/
+        ├── SaneaTechApplicationTests.java     # sobe o contexto, aplica e valida as migrations
+        └── internal/{cidadao,equipe,ocorrencia}/
 ```
-
-**Organização planejada para outra fase (não implementada):**
-
-```text
-aplicacao/             # casos de uso, coordenação de operações
-infraestrutura/        # implementações concretas de repositórios
-apresentacao/          # controllers HTTP / endpoints
-```
-
-O registro de verificações executadas e limitações do ambiente está em [`docs/VALIDACAO.md`](docs/VALIDACAO.md).
 
 ## 7. Diagrama de classes UML
 
@@ -214,24 +186,7 @@ Veja [`docs/diagrama-classes.png`](docs/diagrama-classes.png), [`docs/diagrama-c
 
 Para editar o diagrama, abra `docs/diagrama-classes.puml` em uma ferramenta compatível com PlantUML. Também há `docs/diagrama-classes.dot` para regenerar as imagens usando Graphviz (`dot -Tpng ...` e `dot -Tsvg ...`).
 
-## 8. GitHub e entrega no Google Sala de Aula
-
-Para publicar (substitua `<URL-DO-REPOSITORIO>` pelo endereço real da equipe):
-
-```bash
-git init
-git add .
-git commit -m "Entrega 2 - dominio JPA UML e arquitetura SaneaTech"
-git branch -M main
-git remote add origin <URL-DO-REPOSITORIO>
-git push -u origin main
-```
-
-O repositório precisa conter **todo o código, este README e o UML**. Conceda acesso aos integrantes do grupo no GitHub. No Google Sala de Aula, entregue o **link público/compartilhável do repositório e o arquivo `docs/diagrama-classes.png`**, conforme solicitado. A justificativa arquitetural já está nesta seção 5 do README; o modelo de texto e conferência está em [`docs/ENTREGA.md`](docs/ENTREGA.md).
-
 ---
 
 **Trabalho elaborado por:** Eduardo Cabral; Sérgio Henrique; Leonardo Teixeira; Luca Magalhães; Luís Eduardo Montenegro.  
-**Disciplina:** Backend Avançado — P4.447 — Ciência da Computação.  
-**Data:** 18 de novembro de 2026.
-# SaneaTech
+**Disciplina:** Backend Avançado — P4.447 — Ciência da Computação.
