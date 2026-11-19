@@ -46,6 +46,20 @@ mvn -q compile exec:java
 
 O comando cria um cidadão, uma equipe, uma ocorrência e seus eventos de histórico, persiste os registros no H2 e imprime protocolo, status e quantidade de eventos. O banco `jdbc:h2:mem:saneatech` é **volátil**; ao encerrar a execução, os dados deixam de existir. A demonstração é somente um `main()` para validar a modelagem, não uma camada de aplicação ou API.
 
+### API: cadastro de equipes (`feature/cadastro-equipes`)
+
+```bash
+mvn spring-boot:run   # sobe a API em http://localhost:8080
+
+curl -i -X POST http://localhost:8080/equipes \
+  -H 'Content-Type: application/json' \
+  -d '{"nome": "Equipe de Redes", "areaAtuacao": "Manutenção de água"}'
+```
+
+- `CadastroEquipeController` (`apresentacao`) recebe `POST /equipes` com `nome` e `areaAtuacao` e responde `201 Created` com `Location: /equipes/{id}` e o corpo `{id, nome, areaAtuacao}`.
+- `CadastroEquipeService` (`aplicacao`) cria a entidade `EquipeResponsavel` já existente (cujo construtor valida e remove espaços extras) e impede nomes duplicados, sem diferenciar maiúsculas/minúsculas.
+- Validações: `nome` e `areaAtuacao` obrigatórios, não vazios e com até 120 caracteres → `400`; nome já cadastrado → `409`; JSON malformado → `400`. Erros seguem o formato `ProblemDetail` (RFC 9457).
+
 ### Compilar pacote
 
 ```bash
