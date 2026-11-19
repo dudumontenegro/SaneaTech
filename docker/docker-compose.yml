@@ -1,0 +1,17 @@
+# Postgres local opcional (alternativa ao Neon para desenvolvimento).
+services:
+  postgres:
+    image: postgres:17
+    container_name: saneatech-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: saneatech
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - saneatech_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  saneatech_postgres_data:

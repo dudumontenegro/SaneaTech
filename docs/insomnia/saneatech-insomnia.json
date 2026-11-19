@@ -1,0 +1,1028 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-11-19T20:56:47.000Z",
+  "__export_source": "saneatech",
+  "resources": [
+    {
+      "_id": "wrk_saneatech",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "SaneaTech API",
+      "description": "Rotas e casos de uso das 5 features. Execute em um banco recém-migrado (seed da V5).",
+      "scope": "collection",
+      "created": 1795121807421,
+      "modified": 1795121807421
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_saneatech",
+      "name": "Base Environment",
+      "data": {},
+      "dataPropertyOrder": null,
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 0,
+      "created": 1795121807421,
+      "modified": 1795121807421
+    },
+    {
+      "_id": "env_local",
+      "_type": "environment",
+      "parentId": "env_base",
+      "name": "Local",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "equipe_id": 1,
+        "oc_pendente_com_equipe": 1,
+        "oc_em_andamento": 2,
+        "oc_concluida": 3,
+        "oc_pendente_sem_equipe": 4,
+        "cidadao_id": 1,
+        "id_inexistente": 9999
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "cidadao_id",
+          "equipe_id",
+          "oc_pendente_com_equipe",
+          "oc_em_andamento",
+          "oc_concluida",
+          "oc_pendente_sem_equipe",
+          "id_inexistente"
+        ]
+      },
+      "color": "#7d69cb",
+      "isPrivate": false,
+      "metaSortKey": 1,
+      "created": 1795121807421,
+      "modified": 1795121807421
+    },
+    {
+      "_id": "fld_1_cidadaos",
+      "_type": "request_group",
+      "parentId": "wrk_saneatech",
+      "name": "1. Cadastro de cidadãos (Eduardo)",
+      "description": "POST /cidadaos e GET /cidadaos",
+      "environment": {},
+      "metaSortKey": 1,
+      "created": 1795121807421,
+      "modified": 1795121807421
+    },
+    {
+      "_id": "req_001",
+      "_type": "request",
+      "parentId": "fld_1_cidadaos",
+      "name": "✅ Cadastrar cidadão → 201",
+      "description": "Retorna 201 com header Location. E-mail é normalizado para minúsculas.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/cidadaos",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"João Lima\",\n  \"email\": \"joao.lima@exemplo.com\",\n  \"telefone\": \"83988887777\"\n}"
+      }
+    },
+    {
+      "_id": "req_002",
+      "_type": "request",
+      "parentId": "fld_1_cidadaos",
+      "name": "✅ Listar cidadãos → 200",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/cidadaos",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 2,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "req_003",
+      "_type": "request",
+      "parentId": "fld_1_cidadaos",
+      "name": "❌ E-mail duplicado → 409",
+      "description": "Maria Silva já existe no seed.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/cidadaos",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 3,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Outra Maria\",\n  \"email\": \"maria@saneatech.exemplo\"\n}"
+      }
+    },
+    {
+      "_id": "req_004",
+      "_type": "request",
+      "parentId": "fld_1_cidadaos",
+      "name": "❌ Campos obrigatórios/e-mail inválido → 400",
+      "description": "Resposta traz o mapa 'erros' por campo.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/cidadaos",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 4,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"\",\n  \"email\": \"nao-e-email\"\n}"
+      }
+    },
+    {
+      "_id": "req_005",
+      "_type": "request",
+      "parentId": "fld_1_cidadaos",
+      "name": "❌ JSON malformado → 400",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/cidadaos",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 5,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{nome: sem aspas"
+      }
+    },
+    {
+      "_id": "fld_2_consulta_equipes",
+      "_type": "request_group",
+      "parentId": "wrk_saneatech",
+      "name": "2. Consulta de equipes (Sérgio)",
+      "description": "GET /equipes e GET /equipes/{id}",
+      "environment": {},
+      "metaSortKey": 2,
+      "created": 1795121807421,
+      "modified": 1795121807421
+    },
+    {
+      "_id": "req_006",
+      "_type": "request",
+      "parentId": "fld_2_consulta_equipes",
+      "name": "✅ Listar equipes → 200",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/equipes",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 6,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "req_007",
+      "_type": "request",
+      "parentId": "fld_2_consulta_equipes",
+      "name": "✅ Buscar equipe por ID → 200",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/equipes/{{ _.equipe_id }}",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 7,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "req_008",
+      "_type": "request",
+      "parentId": "fld_2_consulta_equipes",
+      "name": "❌ Equipe inexistente → 404",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/equipes/{{ _.id_inexistente }}",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 8,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "req_009",
+      "_type": "request",
+      "parentId": "fld_2_consulta_equipes",
+      "name": "❌ ID não numérico → 400",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/equipes/abc",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 9,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "fld_3_consulta_ocorrencias",
+      "_type": "request_group",
+      "parentId": "wrk_saneatech",
+      "name": "3. Consulta de ocorrências (Leonardo)",
+      "description": "GET /ocorrencias e GET /ocorrencias/{id}",
+      "environment": {},
+      "metaSortKey": 3,
+      "created": 1795121807421,
+      "modified": 1795121807421
+    },
+    {
+      "_id": "req_010",
+      "_type": "request",
+      "parentId": "fld_3_consulta_ocorrencias",
+      "name": "✅ Listar ocorrências → 200",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/ocorrencias",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 10,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "req_011",
+      "_type": "request",
+      "parentId": "fld_3_consulta_ocorrencias",
+      "name": "✅ Listar filtrando por status → 200",
+      "description": "Filtro opcional: PENDENTE | EM_ANDAMENTO | CONCLUIDA",
+      "method": "GET",
+      "url": "{{ _.base_url }}/ocorrencias?status=PENDENTE",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 11,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "req_012",
+      "_type": "request",
+      "parentId": "fld_3_consulta_ocorrencias",
+      "name": "✅ Buscar ocorrência por ID (com histórico) → 200",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_concluida }}",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 12,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "req_013",
+      "_type": "request",
+      "parentId": "fld_3_consulta_ocorrencias",
+      "name": "❌ Ocorrência inexistente → 404",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.id_inexistente }}",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 13,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "req_014",
+      "_type": "request",
+      "parentId": "fld_3_consulta_ocorrencias",
+      "name": "❌ Status de filtro inválido → 400",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/ocorrencias?status=CANCELADA",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 14,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "fld_4_cadastro_equipes",
+      "_type": "request_group",
+      "parentId": "wrk_saneatech",
+      "name": "4. Cadastro de equipes (Luca)",
+      "description": "POST /equipes",
+      "environment": {},
+      "metaSortKey": 4,
+      "created": 1795121807421,
+      "modified": 1795121807421
+    },
+    {
+      "_id": "req_015",
+      "_type": "request",
+      "parentId": "fld_4_cadastro_equipes",
+      "name": "✅ Cadastrar equipe → 201",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/equipes",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 15,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Equipe de Esgoto\",\n  \"areaAtuacao\": \"Esgotamento sanitário\"\n}"
+      }
+    },
+    {
+      "_id": "req_016",
+      "_type": "request",
+      "parentId": "fld_4_cadastro_equipes",
+      "name": "❌ Nome duplicado (ignora maiúsculas) → 409",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/equipes",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 16,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"equipe de redes\",\n  \"areaAtuacao\": \"Esgoto\"\n}"
+      }
+    },
+    {
+      "_id": "req_017",
+      "_type": "request",
+      "parentId": "fld_4_cadastro_equipes",
+      "name": "❌ Campos obrigatórios → 400",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/equipes",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 17,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{}"
+      }
+    },
+    {
+      "_id": "req_018",
+      "_type": "request",
+      "parentId": "fld_4_cadastro_equipes",
+      "name": "❌ Nome com mais de 120 caracteres → 400",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/equipes",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 18,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n  \"areaAtuacao\": \"Esgoto\"\n}"
+      }
+    },
+    {
+      "_id": "req_019",
+      "_type": "request",
+      "parentId": "fld_4_cadastro_equipes",
+      "name": "❌ JSON malformado → 400",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/equipes",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 19,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{nome: sem aspas"
+      }
+    },
+    {
+      "_id": "fld_5_status",
+      "_type": "request_group",
+      "parentId": "wrk_saneatech",
+      "name": "5. Atualização de status (Luís)",
+      "description": "PATCH /ocorrencias/{id}/status. Rode na ordem: os casos de erro primeiro, depois os de sucesso (o PATCH altera o banco). Para repetir, recrie o banco.",
+      "environment": {},
+      "metaSortKey": 5,
+      "created": 1795121807421,
+      "modified": 1795121807421
+    },
+    {
+      "_id": "req_020",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "❌ Pular etapa PENDENTE → CONCLUIDA → 422",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_pendente_com_equipe }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 20,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"CONCLUIDA\",\n  \"observacao\": \"Tentando pular etapa.\"\n}"
+      }
+    },
+    {
+      "_id": "req_021",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "❌ Retroceder CONCLUIDA → EM_ANDAMENTO → 422",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_concluida }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 21,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"EM_ANDAMENTO\",\n  \"observacao\": \"Reabrir.\"\n}"
+      }
+    },
+    {
+      "_id": "req_022",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "❌ Retroceder EM_ANDAMENTO → PENDENTE → 422",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_em_andamento }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 22,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"PENDENTE\",\n  \"observacao\": \"Voltar.\"\n}"
+      }
+    },
+    {
+      "_id": "req_023",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "❌ Mesmo status → 422",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_em_andamento }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 23,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"EM_ANDAMENTO\",\n  \"observacao\": \"De novo.\"\n}"
+      }
+    },
+    {
+      "_id": "req_024",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "❌ Iniciar sem equipe atribuída → 422",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_pendente_sem_equipe }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 24,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"EM_ANDAMENTO\",\n  \"observacao\": \"Iniciar.\"\n}"
+      }
+    },
+    {
+      "_id": "req_025",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "❌ Ocorrência inexistente → 404",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.id_inexistente }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 25,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"EM_ANDAMENTO\",\n  \"observacao\": \"Teste.\"\n}"
+      }
+    },
+    {
+      "_id": "req_026",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "❌ Observação em branco → 400",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_pendente_com_equipe }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 26,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"EM_ANDAMENTO\",\n  \"observacao\": \" \"\n}"
+      }
+    },
+    {
+      "_id": "req_027",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "❌ Status inexistente → 400",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_pendente_com_equipe }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 27,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"CANCELADA\",\n  \"observacao\": \"Status inexistente.\"\n}"
+      }
+    },
+    {
+      "_id": "req_028",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "❌ Sem status → 400",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_pendente_com_equipe }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 28,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"observacao\": \"Sem status.\"\n}"
+      }
+    },
+    {
+      "_id": "req_029",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "✅ PENDENTE → EM_ANDAMENTO → 200",
+      "description": "Registra novo evento no histórico com a equipe responsável.",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_pendente_com_equipe }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 29,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"EM_ANDAMENTO\",\n  \"observacao\": \"Equipe a caminho.\"\n}"
+      }
+    },
+    {
+      "_id": "req_030",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "✅ EM_ANDAMENTO → CONCLUIDA → 200",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_em_andamento }}/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 30,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"CONCLUIDA\",\n  \"observacao\": \"Rede desobstruída.\"\n}"
+      }
+    },
+    {
+      "_id": "req_031",
+      "_type": "request",
+      "parentId": "fld_5_status",
+      "name": "✅ Conferir histórico atualizado → 200",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/ocorrencias/{{ _.oc_pendente_com_equipe }}",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 31,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {}
+    },
+    {
+      "_id": "fld_6_registro",
+      "_type": "request_group",
+      "parentId": "wrk_saneatech",
+      "name": "Extra: registro de ocorrência (entrega anterior)",
+      "description": "POST /ocorrencias",
+      "environment": {},
+      "metaSortKey": 6,
+      "created": 1795121807421,
+      "modified": 1795121807421
+    },
+    {
+      "_id": "req_032",
+      "_type": "request",
+      "parentId": "fld_6_registro",
+      "name": "✅ Registrar ocorrência → 201",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/ocorrencias",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 32,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cidadaoId\": {{ _.cidadao_id }},\n  \"tipo\": \"VAZAMENTO_AGUA\",\n  \"descricao\": \"Cano estourado na calçada\",\n  \"endereco\": {\n    \"logradouro\": \"Rua A\",\n    \"numero\": \"10\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"João Pessoa\",\n    \"uf\": \"PB\",\n    \"referencia\": \"Em frente à escola\"\n  }\n}"
+      }
+    },
+    {
+      "_id": "req_033",
+      "_type": "request",
+      "parentId": "fld_6_registro",
+      "name": "❌ Cidadão inexistente → 404",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/ocorrencias",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 33,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cidadaoId\": 9999,\n  \"tipo\": \"OUTROS\",\n  \"descricao\": \"Teste\",\n  \"endereco\": {\n    \"logradouro\": \"Rua A\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"João Pessoa\",\n    \"uf\": \"PB\"\n  }\n}"
+      }
+    },
+    {
+      "_id": "req_034",
+      "_type": "request",
+      "parentId": "fld_6_registro",
+      "name": "❌ Tipo inválido / campos faltando → 400",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/ocorrencias",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 34,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "created": 1795121807421,
+      "modified": 1795121807421,
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"tipo\": \"VAZAMENTO_AGUA\"\n}"
+      }
+    }
+  ]
+}

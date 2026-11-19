@@ -1,15 +1,52 @@
-# Maven / Java
-/target/
-*.class
-*.log
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+
+### Banco local ###
 *.h2.db
 *.trace.db
+*.log
 
-# IDE
-.idea/
-*.iml
-.vscode/
-.settings/
-.project
+### váriaveis de ambiente ###
+.env
+aplication-prod.properties
+
+### STS ###
+.apt_generated
 .classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### macOS ###
 .DS_Store
+
+### Segredos (senha do Neon) ###
+src/main/resources/application-prod.properties
+
+### Ferramentas locais ###
+.remember/
