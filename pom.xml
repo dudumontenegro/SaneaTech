@@ -17,6 +17,13 @@
     <name>SaneaTech - Modelagem de Domínio JPA</name>
     <description>Backend Avançado P4.447</description>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.4</version>
+        <relativePath/> 
+    </parent>
+
     <properties>
         <java.version>17</java.version>
         <maven.compiler.release>17</maven.compiler.release>
